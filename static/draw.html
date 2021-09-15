@@ -1,0 +1,141 @@
+<html>
+<script type="text/javascript">
+    var canvas, ctx, flag = false,
+        prevX = 0,
+        currX = 0,
+        prevY = 0,
+        currY = 0,
+        dot_flag = false;
+
+    var x = "black",
+        y = 2;
+
+    function init() {
+        canvas = document.getElementById('can');
+        ctx = canvas.getContext("2d");
+        
+
+        w = canvas.width;
+        h = canvas.height;
+
+        canvas.addEventListener("mousemove", function (e) {
+            findxy('move', e)
+        }, false);
+        canvas.addEventListener("mousedown", function (e) {
+            findxy('down', e)
+        }, false);
+        canvas.addEventListener("mouseup", function (e) {
+            findxy('up', e)
+        }, false);
+        canvas.addEventListener("mouseout", function (e) {
+            findxy('out', e)
+        }, false);
+    }
+
+
+    function draw() {
+        ctx.beginPath(); 
+        ctx.arc(currX, currY, 10, 0, 6.28);
+        ctx.fill()
+        ctx.closePath();
+
+    }
+
+    function wipe(){
+        ctx.fillStyle = 'white';
+        w = canvas.width;
+        h = canvas.height;
+        ctx.fillRect(0, 0, w, h);
+    }
+
+    function save() {
+        document.getElementById("canvasimg").style.border = "2px solid";
+        var dataURL = canvas.toDataURL();
+        document.getElementById("canvasimg").src = dataURL;
+        document.getElementById("canvasimg").style.display = "inline";
+    }
+
+    function findxy(res, e) {
+        if (res == 'down') {
+            prevX = currX;
+            prevY = currY;
+            currX = e.clientX - canvas.offsetLeft;
+            currY = e.clientY - canvas.offsetTop;
+
+            flag = true;
+            dot_flag = true;
+            if (dot_flag) {
+                ctx.beginPath(); 
+                ctx.arc(currX, currY, 10, 0, 6.28);
+                ctx.fill()
+                ctx.closePath();
+                dot_flag = false;
+            }
+        }
+        if (res == 'up' || res == "out") {
+            flag = false;
+        }
+        if (res == 'move') {
+            if (flag) {
+                prevX = currX;
+                prevY = currY;
+                currX = e.clientX - canvas.offsetLeft;
+                currY = e.clientY - canvas.offsetTop;
+                draw();
+            }
+        }
+    }
+
+    function classify() {
+        var c = document.getElementById("can");
+        var ctx = c.getContext("2d");
+        let store = []
+        for (var i = 0; i < 28; i++) {
+            for (var j = 0; j < 28; j++) {
+
+                var s = 0;
+                for (var m = 1; m<10; m++){
+                    for (var n = 1; n<10; n++){
+                        s += ctx.getImageData((j * 10) + m, (i * 10) + n, 1, 1)["data"][3];
+                    }
+                }
+                store.push(s/81);
+            }
+        }
+
+   
+        var req = new XMLHttpRequest();
+        var result = document.getElementById('result');
+        req.onreadystatechange = function()
+        {
+          if(this.readyState == 4 && this.status == 200) {
+            result.innerHTML = "Model prediction: " + this.responseText;
+          } else {
+            result.innerHTML = "thinking...";
+          }
+        }
+
+        req.open('POST', '/', true);
+        req.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
+        req.send(JSON.stringify(store));
+
+    }
+</script>
+
+<body onload="init()">
+    <div>
+            <h3>Draw a digit in the box, then click classify.</h3>
+
+            <canvas id="can" width="280" height="280" style="border:2px solid;"></canvas>
+            <br><br>
+            <button type="button" onclick="location.reload()" style="border:2px solid;">Reset</button>
+            <br>
+            <button type="button" onclick="classify()" style="border:2px solid;">Classify</button>
+
+           <h3 id="result"></h3>
+
+        </div>
+
+</body>
+
+</html>
