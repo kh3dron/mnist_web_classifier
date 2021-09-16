@@ -42,4 +42,4 @@ def classify():
     
         return(str(int(ans)))
     else:
-        return render_template("draw.html")
+        return render_template("/draw.html")
