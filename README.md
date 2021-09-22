@@ -11,7 +11,7 @@ Technologies used in this application:
 - Flask, a python web server framework that let me connect the model to the canvas webpage. This let me put the neural network prediction methon into an API call. 
 - Docker: to containerize all the dependencies for the web server and the neural network.
 - AWS Elastic Contianer Registry: to host this container.  
-- AWS Elastic Container Service: to deploy the dockerized application to a site, which you can check out here: http://54.191.14.81:5000/
+- AWS Elastic Container Service: to deploy the dockerized application to a site, which you can check out here: http://34.213.195.239:5000/
 
 The predictions from the site are far less than 96% accurate. I think this is due to handwriting from  a cursour or mouse is very different than handwriting scanned from a written page. Predictions off of my mouse-writing are around 70% accurate - your milage may vary. 
 
