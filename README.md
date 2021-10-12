@@ -17,3 +17,15 @@ The predictions from the site are far less than 96% accurate. I think this is du
 
 
 
+---
+
+TODO:
+
+- add DNS to the container
+- https://stackoverflow.com/questions/53767231/how-can-you-launch-ecs-fargate-containers-having-a-public-dns
+- https://aws.amazon.com/blogs/compute/microservice-delivery-with-amazon-ecs-and-application-load-balancers/
+
+
+- here's what we need:
+- https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/using-domain-names-with-elb.html
+- https://aws.amazon.com/getting-started/hands-on/deploy-docker-containers/
