@@ -10,6 +10,24 @@
     var x = "black",
         y = 2;
 
+    async function postData(url = '', data = {}) {
+        // Default options are marked with *
+        const response = await fetch(url, {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: 'same-origin', // include, *same-origin, omit
+            headers: {
+                'Content-Type': 'application/json'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            redirect: 'follow', // manual, *follow, error
+            referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+            body: JSON.stringify(data) // body data type must match "Content-Type" header
+        });
+        return response.json(); // parses JSON response into native JavaScript objects
+    }
+
     function init() {
         canvas = document.getElementById('can');
         ctx = canvas.getContext("2d");
@@ -99,116 +117,34 @@
                         s += ctx.getImageData((j * 10) + m, (i * 10) + n, 1, 1)["data"][3];
                     }
                 }
-                store.push(s / 81);
+                store.push(parseInt(s / 81));
             }
         }
+        var req = {}
+        req["bits"] = store
 
-
-        var req = new XMLHttpRequest();
-        var result = document.getElementById('result');
-        req.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                result.innerHTML = "Model prediction: " + this.responseText;
-            } else {
-                result.innerHTML = "Predicting...";
-            }
-        }
-
-        req.open('POST', '/', true);
-        req.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
-        req.send(JSON.stringify(store));
+        postData("/predict/", req)
+        .then(data => {
+            result.innerHTML = "Model prediction: " + data;
+        })
 
     }
 </script>
 
 <body onload="init()">
-
-    <style>
-        canvas {
-            padding-left: 0;
-            padding-right: 0;
-            margin-left: 100;
-            margin-right: auto;
-            display: block;
-        }
-
-        * {
-            font-family: Arial, Helvetica, sans-serif;
-
-        }
-
-        #question {
-            color: red;
-            font-size: 30;
-        }
-
-        #answer {
-            font-size: 20;
-        }
-    </style>
+    {% include "header.html" %}
 
 
-    <h1>MNIST Web Classifier</h1>
-    <h2>Write a digit in the box, and click "classify" for a Neural Network to predict what you've written.</h2>
+    <h3>Write a digit in the box, and click "classify" for a Neural Network to predict what you've written.</h3>
 
 
     <canvas id="can" width="280" height="280" style="border:2px solid;"></canvas>
     <br><br>
     <button type="button" onclick="location.reload()" style="border:2px solid;">Reset</button>
-    <br>
+    <br><br>
     <button type="button" onclick="classify()" style="border:2px solid;">Classify</button>
 
     <h3 id="result"></h3>
-
-    <div id=question>How was the Neural Network created?</div>
-    <div id=answer>I created this model for my submission of the <a
-            href=https://www.kaggle.com/c/digit-recognizer>Kaggle Digit Recognizer</a> competition. The neural Network
-        was 96% accurate on the competition test data, and took less than two minutes to train. I wanted to find a way
-        to further deploy this model, so I wrote this site for it to be used publicly. </div>
-    <br><br>
-
-    <div id=question>The Network was 96% accurate on the test data, but it's far less accurate here. Why the
-        degredation?</div><br>
-    <div id=answer>The MNIST dataset this neural network is trained on consists of 28,000 scanned handwritten digits.
-        Your handwriting is probably quite different from the dataset, which means it may not work well with the model.
-        This could be seen as an example of overfitting to the quicks of human handwriting, rather than generalizing to
-        learn the shapes of each number. </div>
-    <br><br>
-    <div id=question>How does this application work?</div>
-    <div id=answer>Here's a brief summary:
-        <ul>
-            <li>You write your digit in the 280x280 pixel canvas. </li>
-            <li>The canvas is split into a 28x28 grid of 10x10 cells. The average darkness of each 10x10 cell is
-                computed as a value between 0-255.
-            <li>An array of 784 values ranged 0-255 (the format of the MNIST data the network is trained on) is passed
-                via an API call to the neural network, which makes a prediction. The prediction is rendered on this
-                page. </li>
-        </ul>
-    </div>
-
-    <div id=question>How is the application deployed?</div>
-    <div id=answer>Here's another summary:
-        <ul>
-            <li>The model was exported from Kaggle's notebook platform with <a
-                    href=https://machinelearningmastery.com/save-load-machine-learning-models-python-scikit-learn />pickle.</a>
-            </li>
-            <li>The Canvas methods are written in Javascript, and the rest of this page in HTML.
-            <li>All of these elements are combined in a Flask server, which lets the javascript and python talk to
-                eachother easily with simple APIs. </li>
-            <li>The whole application was dockerized, packaging up all the dependencies for the Flask server and the ML
-                libraries used for the model. </li>
-            <li>That Docker image was uploaded to my AWS account, using <a href = https://aws.amazon.com/ecr/> AWS Elastic Container Registry.</a></li>
-            <li>The image was deployed serverlessly using <a href = https://aws.amazon.com/ecs/>AWS Elastic Container Service</a> and <a href=https://aws.amazon.com/fargate/>AWS Fargate.</a></li>
-        </ul>
-    </div>
-
-
-
-    <div id=question>Wow, this is exactly the kind of AI/ML development expertise I need on my team! How can I get in
-        contact with you? </div>
-    <div id=answer>I'm glad my project has brought you so much joy. Here's my <a
-            href=https://www.linkedin.com/in/tristan-saldanha />linkedIn</a>, <a
-            href=https://github.com/kh3dron>github</a>, and <a href=tristansaldanha@gmail.com>email.</a> </div>
 
 
 </body>
