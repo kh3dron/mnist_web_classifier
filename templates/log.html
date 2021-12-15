@@ -1,0 +1,31 @@
+{% include "header.html" %}
+
+<h3>Past Performance</h3>
+<table>
+        <tr>
+            <th>ID</th>
+            <th>Image</th>
+            <th>Model Predicted</th>
+            <th>User Intended</th>
+            <th>Prediction Accurate?</th>
+            <th>Model Version</th>
+        </tr>
+        {% for item in hst %}
+        <tr>
+            <td>{{item[0]}}</td>
+            <td>
+                    <canvas id="can{{item[0]}}" width="28" height="28" style="border:2px solid;"></canvas>
+
+                <script>
+                    var bits = "{{item[1]}}".split(",");
+                    console.log("can"+{{item[0]}})
+                    drawData(bits, "can"+{{item[0]}});
+                </script>
+            </td>
+            <td>{{item[2]}}</td>
+            <td>{{item[3]}}</td>
+            <td>{{item[4]}}</td>
+            <td>{{item[5]}}</td>
+        </tr>
+        {% endfor %}
+    </table>

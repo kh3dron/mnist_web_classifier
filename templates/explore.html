@@ -1,0 +1,11 @@
+{% include "header.html" %}
+
+
+{% for each in s %}
+<canvas id="can{{loop.index}}" width="28" height="28" style="border:2px solid;"></canvas>
+<script>
+            var bits = [{{each}}];
+            console.log("can" + {{loop.index}});
+            drawData(bits, "can" + {{loop.index}});
+    </script>
+{% endfor %}
