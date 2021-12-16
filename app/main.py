@@ -1,11 +1,30 @@
 #AI components
 import math
 import pickle
-import pandas
+import pandas as pd
 import numpy
 from sklearn import model_selection
 from sklearn.linear_model import LogisticRegression
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+from datetime import date
+from sklearn.model_selection import train_test_split #for split the data
+from sklearn import metrics
+from sklearn.metrics import accuracy_score  #for accuracy_score
+from sklearn.metrics import confusion_matrix #for confusion matrix
+from sklearn.model_selection import KFold #for K-fold cross validation
+from sklearn.model_selection import cross_val_score #score evaluation
+from sklearn.model_selection import cross_val_predict #prediction
+import matplotlib.pyplot as plt
+import time
 
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import RocCurveDisplay
+from sklearn.metrics import roc_curve, auc
+from sklearn.datasets import load_wine
 
 # FastAPI 
 from typing import List
@@ -19,9 +38,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
-#others
 import os
+from datetime import datetime
 
 # FastAPI Setup & Connect to Database
 templates = Jinja2Templates(directory="templates")
@@ -34,16 +52,6 @@ def get_db():
     finally:
         db.close()
 app = FastAPI()
-
-# Load 1000 Training datas into some easily searchable formats
-# Testing purposes, actual implementation tbd
-print("Loading CSV...")
-df = pandas.read_csv("./app/train_small.csv")
-print(df.head())
- 
-x = df.to_string(header=False, index=False, index_names=False).split('\n')
-samples = [','.join(ele.split())[2:] for ele in x]
-print(samples[0])
 
 @app.get("/")
 async def root(request: Request):
@@ -61,18 +69,65 @@ async def root(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/explore")
 async def root(request: Request, db: Session = Depends(get_db)):
+    s = [e.aslist()[1] for e in crud.get_history(db, limit=100)]
+    return templates.TemplateResponse("./explore.html", {"request": request, "s":s})
 
-    series = samples[:10]
-    return templates.TemplateResponse("./explore.html", {"request": request, "s":series})
+@app.get("/stats")
+async def root(request: Request, db: Session = Depends(get_db)):
+    f = open("./app/modelstats.txt", "r")
+    stats = json.load(f)
+    f.close()
+    keys, vals = list(stats.keys()), list(stats.values())
+    return templates.TemplateResponse("./stats.html", {"request": request, "k":keys, "v":vals})
 
 @app.post("/predict/")
-def model_prediction(req: schemas.modelPrediction):
+def model_prediction(req: schemas.modelPrediction, db: Session = Depends(get_db)):
     labels = ["pixel"+str(r) for r in range(0, 784)]
     lab = numpy.array((labels))
     pixels = (list(req.bits))
     inp = numpy.array(pixels)
-    arr = pandas.DataFrame([inp], columns = lab)
+    arr = pd.DataFrame([inp], columns = lab)
     ans = loaded_model.predict(arr)
+
+
+    print("Loading CSVs")
+    traindf=pd.read_csv("./app/train_small.csv")
+    testdf=pd.read_csv("./app/test.csv")
+
+    #add user data to training set
+    userdata = [e.rowform() for e in crud.get_history(db)]
+    labels = ["label"] + ["pixel"+str(r) for r in range(0, 784)]
+    userpd = pd.DataFrame(userdata, columns=traindf.columns.tolist())
+    traindf.append(userpd, ignore_index=True)
+    traindf = pd.concat([traindf, userpd])
+
+    #Initialize training features
+    all_features = traindf.drop("label",axis=1) #copy of the traindf without label "feature"
+    Targeted_feature = traindf["label"]
+    X_train,X_test,y_train,y_test = train_test_split(all_features,Targeted_feature,test_size=0.3,random_state=42)
+    
+    #Neural Network
+    from sklearn.neural_network import MLPClassifier
+    print("Training network on " + str(X_train.shape[0]) + " rows")
+    model = MLPClassifier(solver='adam', alpha=1e-5, hidden_layer_sizes=(80, 40, 20), random_state=1)
+    t1 = time.time()
+    model.fit(X_train, y_train)
+    dt = time.time()-t1
+    prediction_lr=model.predict(X_test)
+    obj = {
+        "Trained At": datetime.now().strftime("%X %x"),
+        "Time to Train": str(int(dt))+" seconds",
+        "User Generated Rows": userpd.shape[0],
+        "Rows from MNIST": traindf.shape[0] - userpd.shape[0],
+        "Total Training Rows": X_train.shape[0],
+        "Testing Rows": X_test.shape[0],
+        "Model Accuracy": str(round(accuracy_score(prediction_lr,y_test)*100,2))+"%",
+        "Hidden Layer Configuration": str(model.hidden_layer_sizes) 
+    }
+    m =  open("./app/modelstats.txt", "w")
+    m.write(json.dumps(obj))
+    m.close()
+    print("Metadata refreshed")
 
     return(str(int(ans)))
 

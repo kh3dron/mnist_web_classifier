@@ -13,7 +13,8 @@ class History(Base):
     correct = Column(Boolean, index=True)
     model_version = Column(String, index=True)
 
-
     def aslist(self):
- 
         return [self.id, self.bits, self.predicted, self.intended, self.correct, self.model_version]
+
+    def rowform(self):
+        return [int(self.intended)] + [int(e) for e in self.bits.split(",")]

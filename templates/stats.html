@@ -1,0 +1,13 @@
+{% include "header.html" %}
+
+
+<h2>Statistics for most recently trained model</h2>
+<table>
+    {% for e in k %}
+    <tr>
+
+        <th>{{e}}</th>
+        <th>{{v[loop.index-1]}}</th>
+    </tr>
+    {% endfor %}
+</table>
