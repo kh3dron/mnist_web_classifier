@@ -43,7 +43,7 @@ from datetime import datetime
 
 # FastAPI Setup & Connect to Database
 templates = Jinja2Templates(directory="templates")
-loaded_model = pickle.load(open("digit_model.sav", 'rb'))
+loaded_model = pickle.load(open("./app/digit_model.sav", 'rb'))
 models.Base.metadata.create_all(bind=engine)
 def get_db():
     db = SessionLocal()
@@ -128,6 +128,10 @@ def model_prediction(req: schemas.modelPrediction, db: Session = Depends(get_db)
     m.write(json.dumps(obj))
     m.close()
     print("Metadata refreshed")
+
+    fname = "./app/digit_model.sav"
+    pickle.dump(model, open(fname, "wb"))
+    print("Model Replaced")
 
     return(str(int(ans)))
 

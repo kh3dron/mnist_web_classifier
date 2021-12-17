@@ -1,2 +1,3 @@
 train*.csv
 test*.csv
+sql_app.db

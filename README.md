@@ -24,6 +24,10 @@
   - each time a user uses the model, a new data object is created: user drawing and user label. this is added to a DB of user created data
   - model trainer launches, opens both CSV MNIST dataset and the user dataset, trains
   - re-generates metadata page, re-deploys model to classify page
+## [1.4]
+- generate requirements.txt with pipreqs
+- build docker with docker build -t imagename
+
 
 ## [todo]
 - dataviz on training convergence would be nice - ROC curve equivalent for non-binary classifier? research
