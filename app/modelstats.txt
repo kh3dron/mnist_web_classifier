@@ -1,1 +1,1 @@
-{"Trained At": "12:04:06 12/16/21", "Time to Train": "1 seconds", "User Generated Rows": 39, "Rows from MNIST": 1000, "Total Training Rows": 727, "Testing Rows": 312, "Model Accuracy": "66.03%", "Hidden Layer Configuration": "(80, 40, 20)"}
+{"Trained At": "19:27:16 12/26/21", "Time to Train": "2 seconds", "User Generated Rows": 43, "Rows from MNIST": 1000, "Total Training Rows": 730, "Testing Rows": 313, "Model Accuracy": "60.7%", "Hidden Layer Configuration": "(80, 40, 20)"}

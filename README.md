@@ -1,5 +1,8 @@
 # MNIST Web Classifier
 
+Run with: 
+uvicorn app.main:app --reload
+
 ### Changelog 
 ## [1.0]
 - generated and trained model off of mnist dataset
@@ -27,6 +30,10 @@
 ## [1.4]
 - generate requirements.txt with pipreqs
 - build docker with docker build -t imagename
+- uplodaed to ECR
+## [1.5]
+- Service-by-service deployment to AWS
+- Sagemaker
 
 
 ## [todo]

@@ -89,7 +89,6 @@ def model_prediction(req: schemas.modelPrediction, db: Session = Depends(get_db)
     arr = pd.DataFrame([inp], columns = lab)
     ans = loaded_model.predict(arr)
 
-
     print("Loading CSVs")
     traindf=pd.read_csv("./app/train_small.csv")
     testdf=pd.read_csv("./app/test.csv")
