@@ -43,7 +43,6 @@ from datetime import datetime
 
 # FastAPI Setup & Connect to Database
 templates = Jinja2Templates(directory="templates")
-loaded_model = pickle.load(open("./app/digit_model.sav", 'rb'))
 models.Base.metadata.create_all(bind=engine)
 def get_db():
     db = SessionLocal()
@@ -82,57 +81,19 @@ async def root(request: Request, db: Session = Depends(get_db)):
 
 @app.post("/predict/")
 def model_prediction(req: schemas.modelPrediction, db: Session = Depends(get_db)):
-    labels = ["pixel"+str(r) for r in range(0, 784)]
-    lab = numpy.array((labels))
+
+    # format user drawn data into convnet structure
     pixels = (list(req.bits))
     inp = numpy.array(pixels)
-    arr = pd.DataFrame([inp], columns = lab)
+    arr = numpy.array(inp)
+    arr = arr.reshape(1, 28, 28, 1)
+    arr = arr.astype('float32') / 255
+
+    loaded_model = pickle.load(open("./app/digit_model.sav", 'rb'))
     ans = loaded_model.predict(arr)
 
-    print("Loading CSVs")
-    traindf=pd.read_csv("./app/train_small.csv")
-    testdf=pd.read_csv("./app/test.csv")
-
-    #add user data to training set
-    userdata = [e.rowform() for e in crud.get_history(db)]
-    labels = ["label"] + ["pixel"+str(r) for r in range(0, 784)]
-    userpd = pd.DataFrame(userdata, columns=traindf.columns.tolist())
-    traindf.append(userpd, ignore_index=True)
-    traindf = pd.concat([traindf, userpd])
-
-    #Initialize training features
-    all_features = traindf.drop("label",axis=1) #copy of the traindf without label "feature"
-    Targeted_feature = traindf["label"]
-    X_train,X_test,y_train,y_test = train_test_split(all_features,Targeted_feature,test_size=0.3,random_state=42)
-    
-    #Neural Network
-    from sklearn.neural_network import MLPClassifier
-    print("Training network on " + str(X_train.shape[0]) + " rows")
-    model = MLPClassifier(solver='adam', alpha=1e-5, hidden_layer_sizes=(80, 40, 20), random_state=1)
-    t1 = time.time()
-    model.fit(X_train, y_train)
-    dt = time.time()-t1
-    prediction_lr=model.predict(X_test)
-    obj = {
-        "Trained At": datetime.now().strftime("%X %x"),
-        "Time to Train": str(int(dt))+" seconds",
-        "User Generated Rows": userpd.shape[0],
-        "Rows from MNIST": traindf.shape[0] - userpd.shape[0],
-        "Total Training Rows": X_train.shape[0],
-        "Testing Rows": X_test.shape[0],
-        "Model Accuracy": str(round(accuracy_score(prediction_lr,y_test)*100,2))+"%",
-        "Hidden Layer Configuration": str(model.hidden_layer_sizes) 
-    }
-    m =  open("./app/modelstats.txt", "w")
-    m.write(json.dumps(obj))
-    m.close()
-    print("Metadata refreshed")
-
-    fname = "./app/digit_model.sav"
-    pickle.dump(model, open(fname, "wb"))
-    print("Model Replaced")
-
-    return(str(int(ans)))
+     
+    return(str(ans.argmax()))
 
 @app.post("/add_history/")
 def add_history_item(hst: schemas.addHistory, db: Session = Depends(get_db)):

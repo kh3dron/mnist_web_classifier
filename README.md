@@ -1,7 +1,7 @@
 # MNIST Web Classifier
 
 Run with: 
-uvicorn app.main:app --reload
+NEW_RELIC_CONFIG_FILE=newrelic.ini newrelic-admin run-program uvicorn app.main:app --reload
 
 ### Changelog 
 ## [1.0]
@@ -32,12 +32,19 @@ uvicorn app.main:app --reload
 - build docker with docker build -t imagename
 - uplodaed to ECR
 ## [1.5]
-- Service-by-service deployment to AWS
-- Sagemaker
+- added new relic one for basic observability
+- user database now dumped to local CSV to simplify database accesses and match format of MNIST dataset
+- Update model: switch from an MLP to a convolutional network for better performance on translation-blind features
+  - was stuck here for a while, translating data shapes & formats between ML libraries
+- model re-training is now completely decoupled from webapp. Good design, but currently no way to re-train network. so needs better implementation 
 
 
 ## [todo]
+- want to return a percentage distribution of confidences eventually
 - dataviz on training convergence would be nice - ROC curve equivalent for non-binary classifier? research
 - Deployment:
-  - re-containerize & deploy to AWS
-  - add DNS
+  - re-containerize & deploy to AWS & add DNS
+  - Sagemaker?
+  - work queue for training before returning prediction
+    - worker pool does training outside the webapp prediction return
+- Decouple training from prediction to seperate microservice for better user experience  
