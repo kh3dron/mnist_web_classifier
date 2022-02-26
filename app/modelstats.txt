@@ -1,1 +1,1 @@
-{"Trained At": "14:34:08 02/10/22", "Time to Train": "44 seconds", "User Generated Rows": 58, "Rows from MNIST": 29382, "Total Training Rows": 29440, "Testing Rows": 12618, "Model Accuracy": "99.0%"}
+{"Trained At": "15:02:18 02/25/22", "Time to Train": "41 seconds", "User Generated Rows": 74, "Rows from MNIST": 29377, "Total Training Rows": 29451, "Testing Rows": 12623, "Model Accuracy": "99.0%"}

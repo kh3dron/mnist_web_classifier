@@ -1,1 +1,0 @@
-{"Trained At": "00:00:00 12/15/21", "Time to Train": "3 seconds", "Rows trained on": 699, "Rows tested on": 300, "Accuracy": 62.33, "Configuration": "(80, 40, 20)"}Just Ffeel something

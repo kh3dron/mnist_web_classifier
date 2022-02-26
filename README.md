@@ -1,8 +1,5 @@
 # MNIST Web Classifier
 
-Run with: 
-NEW_RELIC_CONFIG_FILE=newrelic.ini newrelic-admin run-program uvicorn app.main:app --reload
-
 ### Changelog 
 ## [1.0]
 - generated and trained model off of mnist dataset
@@ -37,7 +34,9 @@ NEW_RELIC_CONFIG_FILE=newrelic.ini newrelic-admin run-program uvicorn app.main:a
 - Update model: switch from an MLP to a convolutional network for better performance on translation-blind features
   - was stuck here for a while, translating data shapes & formats between ML libraries
 - model re-training is now completely decoupled from webapp. Good design, but currently no way to re-train network. so needs better implementation 
-
+## [1.6]
+- added makefile to launch easily with optional NR observability
+- patched issue with user data not updating into CSV used for training
 
 ## [todo]
 - want to return a percentage distribution of confidences eventually
@@ -47,4 +46,3 @@ NEW_RELIC_CONFIG_FILE=newrelic.ini newrelic-admin run-program uvicorn app.main:a
   - Sagemaker?
   - work queue for training before returning prediction
     - worker pool does training outside the webapp prediction return
-- Decouple training from prediction to seperate microservice for better user experience  
